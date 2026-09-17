@@ -26,7 +26,13 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
 
       - name: Build debug APK
-        run: ./gradlew --no-daemon assembleDebug
+        # Скачивание дистрибутива Gradle и зависимостей иногда обрывается на раннере; три попытки.
+        run: |
+          for i in 1 2 3; do
+            ./gradlew --no-daemon assembleDebug && exit 0
+            echo "attempt $i failed, retrying in 20s"; sleep 20
+          done
+          exit 1
 
       - name: Rename APK
         run: cp app/build/outputs/apk/debug/app-debug.apk secondbrain-capture-${{ github.run_number }}.apk
