@@ -38,5 +38,16 @@ services:
       bash -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8400 --reload"
     restart: unless-stopped
 
+  # Туннель Cloudflare: делает ядро доступным с телефона по https-адресу.
+  # Включается профилем: docker compose --profile tunnel up -d
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: brain-tunnel
+    profiles: ["tunnel"]
+    command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN}
+    depends_on:
+      - core
+    restart: unless-stopped
+
 volumes:
   brain-pgdata:
