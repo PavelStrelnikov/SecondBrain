@@ -11,7 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.auth import require_health_user
 from app.config import settings
 from app.db import get_db
-from app.models import Event
+from app.models import Event, Recording
 
 router = APIRouter(tags=["health"])
 templates = Jinja2Templates(directory="app/templates")
@@ -66,6 +66,9 @@ async def health_page(
     recent = (
         (await db.execute(select(Event).order_by(Event.occurred_at.desc()).limit(50))).scalars().all()
     )
+    recs = (await db.execute(select(Recording).order_by(Recording.recorded_at.desc()).limit(50))).scalars().all()
+    rec_by_call = {r.call_event_key: r for r in recs if r.call_event_key}
+    rec_pending = sum(1 for r in recs if r.status in ("pending", "transcribing"))
     rows = [
         {
             "occurred": e.occurred_at.astimezone(tz).strftime("%d.%m %H:%M:%S"),
@@ -77,8 +80,21 @@ async def health_page(
             "key": e.event_key,
             "received": e.received_at.astimezone(tz).strftime("%d.%m %H:%M:%S"),
             "payload": json.dumps(e.payload or {}, ensure_ascii=False, indent=2),
+            "transcript": _rec_text(rec_by_call.get(e.event_key)),
         }
         for e in recent
+    ]
+    rec_rows = [
+        {
+            "recorded": r.recorded_at.astimezone(tz).strftime("%d.%m %H:%M"),
+            "filename": r.filename,
+            "phone": r.phone_hint or "",
+            "status": r.status,
+            "lang": r.language or "",
+            "transcript": r.transcript or (r.error or ""),
+            "linked": "да" if r.call_event_key else "нет",
+        }
+        for r in recs
     ]
 
     return templates.TemplateResponse(
@@ -89,8 +105,20 @@ async def health_page(
             "sources": sources,
             "today": dict(today_counts),
             "rows": rows,
+            "rec_rows": rec_rows,
+            "rec_pending": rec_pending,
         },
     )
+
+
+def _rec_text(rec) -> str:
+    if rec is None:
+        return ""
+    if rec.status == "done":
+        return rec.transcript or ""
+    if rec.status == "error":
+        return "ошибка расшифровки: " + (rec.error or "")
+    return "расшифровка: " + rec.status
 
 
 def _humanize(delta: timedelta) -> str:

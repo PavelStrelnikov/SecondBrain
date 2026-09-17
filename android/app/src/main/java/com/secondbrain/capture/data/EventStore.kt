@@ -17,6 +17,7 @@ class EventStore(context: Context) : SQLiteOpenHelper(context, "events.db", null
             "CREATE TABLE events (event_key TEXT PRIMARY KEY, json TEXT NOT NULL, created_at INTEGER NOT NULL, sent INTEGER NOT NULL DEFAULT 0)"
         )
         db.execSQL("CREATE INDEX idx_events_sent ON events(sent, created_at)")
+        db.execSQL("CREATE TABLE uploaded_recordings (file_key TEXT PRIMARY KEY, created_at INTEGER NOT NULL)")
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) = Unit
@@ -52,6 +53,19 @@ class EventStore(context: Context) : SQLiteOpenHelper(context, "events.db", null
         } finally {
             db.endTransaction()
         }
+    }
+
+    /** @return true, если этой записи ещё не было (её надо загрузить). */
+    fun markRecordingSeen(fileKey: String): Boolean {
+        val cv = ContentValues().apply {
+            put("file_key", fileKey)
+            put("created_at", System.currentTimeMillis())
+        }
+        return writableDatabase.insertWithOnConflict("uploaded_recordings", null, cv, SQLiteDatabase.CONFLICT_IGNORE) != -1L
+    }
+
+    fun forgetRecording(fileKey: String) {
+        writableDatabase.delete("uploaded_recordings", "file_key = ?", arrayOf(fileKey))
     }
 
     fun countPending(): Long = readableDatabase.compileStatement("SELECT COUNT(*) FROM events WHERE sent = 0").simpleQueryForLong()

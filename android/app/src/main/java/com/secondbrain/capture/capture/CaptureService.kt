@@ -34,6 +34,7 @@ class CaptureService : Service() {
     private val heartbeat = object : Runnable {
         override fun run() {
             sendHeartbeat("alive")
+            handler.post(scanRecordings)
             handler.postDelayed(this, HEARTBEAT_MS)
         }
     }
@@ -62,6 +63,13 @@ class CaptureService : Service() {
     private val scanCalls = Runnable {
         val added = CallLogWatcher(this).scan()
         if (added > 0) UploadWorker.uploadNow(this)
+        // Файл записи появляется через несколько секунд после конца звонка; сканируем с задержкой.
+        handler.postDelayed(scanRecordings, 8000)
+        handler.postDelayed(scanRecordings, 30000)
+    }
+
+    private val scanRecordings = Runnable {
+        Thread { runCatching { RecordingWatcher(this).scan() } }.start()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int = START_STICKY

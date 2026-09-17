@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
+import android.os.Build
 import android.os.PowerManager
 import android.provider.Settings
 import android.widget.Button
@@ -33,6 +34,10 @@ class MainActivity : AppCompatActivity() {
         Manifest.permission.READ_PHONE_STATE,
         Manifest.permission.POST_NOTIFICATIONS,
     )
+
+    private val audioPerm =
+        if (Build.VERSION.SDK_INT >= 33) Manifest.permission.READ_MEDIA_AUDIO
+        else Manifest.permission.READ_EXTERNAL_STORAGE
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -64,6 +69,9 @@ class MainActivity : AppCompatActivity() {
         }
         findViewById<Button>(R.id.permNotifListener).setOnClickListener {
             startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
+        }
+        findViewById<Button>(R.id.permAudio).setOnClickListener {
+            ActivityCompat.requestPermissions(this, arrayOf(audioPerm), 2)
         }
         findViewById<Button>(R.id.permBattery).setOnClickListener {
             startActivity(
@@ -97,6 +105,9 @@ class MainActivity : AppCompatActivity() {
     private fun hasNotificationAccess(): Boolean =
         NotificationManagerCompat.getEnabledListenerPackages(this).contains(packageName)
 
+    private fun hasAudioPerm(): Boolean =
+        ContextCompat.checkSelfPermission(this, audioPerm) == PackageManager.PERMISSION_GRANTED
+
     private fun batteryUnrestricted(): Boolean =
         getSystemService(PowerManager::class.java).isIgnoringBatteryOptimizations(packageName)
 
@@ -112,6 +123,7 @@ class MainActivity : AppCompatActivity() {
             "${if (hasRuntimePerms()) ok else no} звонки и уведомления приложения",
             "${if (hasNotificationAccess()) ok else no} доступ к уведомлениям WhatsApp",
             "${if (batteryUnrestricted()) ok else no} без ограничений батареи",
+            "${if (hasAudioPerm()) ok else no} доступ к записям звонков",
         ).joinToString("\n")
 
         io.execute {

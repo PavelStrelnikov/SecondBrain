@@ -77,10 +77,16 @@
             android:text="2. Доступ к уведомлениям WhatsApp" />
 
         <Button
+            android:id="@+id/permAudio"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="3. Доступ к записям звонков" />
+
+        <Button
             android:id="@+id/permBattery"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="3. Не усыплять приложение" />
+            android:text="4. Не усыплять приложение" />
 
         <TextView
             android:id="@+id/permStatus"

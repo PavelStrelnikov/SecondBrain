@@ -61,10 +61,27 @@
 </tr>
 <tr class="detail"><td colspan="6">
   <div class="muted">ключ {{ r.key }} · получено {{ r.received }}</div>
+  {% if r.transcript %}<div style="margin:6px 0"><b>Транскрипт:</b><pre>{{ r.transcript }}</pre></div>{% endif %}
   <pre>{{ r.payload }}</pre>
 </td></tr>
 {% endfor %}
 </table></div>
-<p class="muted">Клик по строке раскрывает все данные события.</p>
+<p class="muted">Клик по строке раскрывает все данные события. У звонков с записью показан транскрипт.</p>
+
+<h2>Записи звонков{% if rec_pending %} · в очереди на расшифровку: {{ rec_pending }}{% endif %}</h2>
+{% if rec_rows %}
+<div class="wrap"><table>
+<tr><th>Когда</th><th>Номер</th><th>Статус</th><th>Язык</th><th>Привязан</th><th>Транскрипт</th></tr>
+{% for r in rec_rows %}
+<tr class="row" onclick="this.nextElementSibling.classList.toggle('open')">
+  <td>{{ r.recorded }}</td><td>{{ r.phone }}</td><td>{{ r.status }}</td>
+  <td>{{ r.lang }}</td><td>{{ r.linked }}</td><td class="sum">{{ r.transcript }}</td>
+</tr>
+<tr class="detail"><td colspan="6"><div class="muted">{{ r.filename }}</div><pre>{{ r.transcript }}</pre></td></tr>
+{% endfor %}
+</table></div>
+{% else %}
+<p class="muted">Записей ещё нет. Нажми «Запись» во время звонка на телефоне Samsung.</p>
+{% endif %}
 </body>
 </html>

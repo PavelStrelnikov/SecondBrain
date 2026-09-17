@@ -31,11 +31,30 @@ services:
       - "8400:8400"
     volumes:
       - ./core:/app
+      - brain-audio:/data/recordings
     depends_on:
       db:
         condition: service_healthy
     command: >
       bash -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8400 --reload"
+    restart: unless-stopped
+
+  worker:
+    build:
+      context: ./core
+      dockerfile: Dockerfile.worker
+    container_name: brain-worker
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      WHISPER_MODEL: ${WHISPER_MODEL:-small}
+      WHISPER_LANGUAGE: ${WHISPER_LANGUAGE:-}
+      TZ: ${TZ:-Asia/Jerusalem}
+    volumes:
+      - brain-audio:/data/recordings
+      - brain-models:/root/.cache/huggingface
+    depends_on:
+      db:
+        condition: service_healthy
     restart: unless-stopped
 
   # Туннель Cloudflare: делает ядро доступным с телефона по https-адресу.
@@ -51,3 +70,5 @@ services:
 
 volumes:
   brain-pgdata:
+  brain-audio:
+  brain-models:
