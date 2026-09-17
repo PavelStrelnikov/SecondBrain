@@ -14,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
+import com.secondbrain.capture.capture.BootReceiver
 import com.secondbrain.capture.capture.CaptureService
 import com.secondbrain.capture.data.EventStore
 import com.secondbrain.capture.net.Uploader
@@ -101,6 +102,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun startServiceIfAllowed() {
         if (hasRuntimePerms()) CaptureService.start(this)
+        if (hasNotificationAccess()) BootReceiver.rebindListener(this)
     }
 
     private fun refresh() {
