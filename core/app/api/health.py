@@ -1,3 +1,4 @@
+import json
 from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 
@@ -73,6 +74,9 @@ async def health_page(
             "source": e.source,
             "direction": e.direction or "",
             "summary": _summarize(e),
+            "key": e.event_key,
+            "received": e.received_at.astimezone(tz).strftime("%d.%m %H:%M:%S"),
+            "payload": json.dumps(e.payload or {}, ensure_ascii=False, indent=2),
         }
         for e in recent
     ]

@@ -19,6 +19,12 @@
   .chips span { display:inline-block; padding:2px 10px; border:1px solid var(--line); border-radius:12px; margin:0 6px 6px 0; }
   .wrap { overflow-x:auto; }
   td.sum { max-width:60vw; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  tr.row { cursor:pointer; }
+  tr.row:hover { background:rgba(128,128,128,.08); }
+  tr.detail { display:none; }
+  tr.detail.open { display:table-row; }
+  tr.detail td { background:rgba(128,128,128,.06); }
+  pre { margin:0; white-space:pre-wrap; word-break:break-word; font:13px/1.4 ui-monospace, monospace; }
 </style>
 </head>
 <body>
@@ -49,11 +55,16 @@
 <div class="wrap"><table>
 <tr><th>Когда</th><th>Задержка</th><th>Тип</th><th>Источник</th><th>Напр.</th><th>Содержание</th></tr>
 {% for r in rows %}
-<tr>
+<tr class="row" onclick="this.nextElementSibling.classList.toggle('open')">
   <td>{{ r.occurred }}</td><td class="muted">{{ r.lag_s }} с</td><td>{{ r.type }}</td>
   <td>{{ r.source }}</td><td>{{ r.direction }}</td><td class="sum">{{ r.summary }}</td>
 </tr>
+<tr class="detail"><td colspan="6">
+  <div class="muted">ключ {{ r.key }} · получено {{ r.received }}</div>
+  <pre>{{ r.payload }}</pre>
+</td></tr>
 {% endfor %}
 </table></div>
+<p class="muted">Клик по строке раскрывает все данные события.</p>
 </body>
 </html>
