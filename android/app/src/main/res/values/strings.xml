@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Second Brain</string>
+    <string name="channel_name">Перехват</string>
+    <string name="notif_running">Слежу за звонками и сообщениями</string>
+</resources>

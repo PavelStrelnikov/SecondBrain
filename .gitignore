@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+
+# Env
+.env
+*.local
+
+# Android
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+android/.idea/
+*.apk
+*.aab
+*.keystore
+
+# OS / editors
+.DS_Store
+.vscode/

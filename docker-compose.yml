@@ -1,0 +1,42 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: brain-db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      TZ: ${TZ:-Asia/Jerusalem}
+    ports:
+      - "5440:5432"
+    volumes:
+      - brain-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  core:
+    build:
+      context: ./core
+    container_name: brain-core
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      DEVICE_TOKEN: ${DEVICE_TOKEN}
+      HEALTH_PASSWORD: ${HEALTH_PASSWORD}
+      TZ: ${TZ:-Asia/Jerusalem}
+    ports:
+      - "8400:8400"
+    volumes:
+      - ./core:/app
+    depends_on:
+      db:
+        condition: service_healthy
+    command: >
+      bash -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8400 --reload"
+    restart: unless-stopped
+
+volumes:
+  brain-pgdata:

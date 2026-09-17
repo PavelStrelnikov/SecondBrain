@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Second Brain · перехват"
+            android:textSize="22sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Адрес сервера" />
+
+        <EditText
+            android:id="@+id/serverUrl"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="https://brain.example.com"
+            android:inputType="textUri" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="Токен устройства" />
+
+        <EditText
+            android:id="@+id/token"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="из .env на сервере, DEVICE_TOKEN"
+            android:inputType="textPassword" />
+
+        <Button
+            android:id="@+id/save"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="Сохранить и проверить связь" />
+
+        <TextView
+            android:id="@+id/connStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="Разрешения"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/permRuntime"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="1. Звонки и уведомления приложения" />
+
+        <Button
+            android:id="@+id/permNotifListener"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="2. Доступ к уведомлениям WhatsApp" />
+
+        <Button
+            android:id="@+id/permBattery"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="3. Не усыплять приложение" />
+
+        <TextView
+            android:id="@+id/permStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="Состояние"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/stats"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:fontFamily="monospace"
+            android:text="" />
+
+        <Button
+            android:id="@+id/sendNow"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="Отправить сейчас" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:textSize="13sp"
+            android:text="Samsung: Настройки → Батарея → Ограничения в фоновом режиме → добавь Second Brain в «Приложения без ограничений» и убери из «Спящих». Иначе One UI убьёт службу ночью." />
+    </LinearLayout>
+</ScrollView>
