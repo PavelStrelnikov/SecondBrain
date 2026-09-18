@@ -3,6 +3,7 @@ package com.secondbrain.capture.net
 import android.content.Context
 import android.net.Uri
 import android.util.Log
+import java.io.File
 import com.secondbrain.capture.Prefs
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -20,9 +21,16 @@ class RecordingUploader(private val context: Context) {
         .readTimeout(60, TimeUnit.SECONDS)
         .build()
 
+    fun uploadFile(file: File, filename: String, recordedAtIso: String, durationS: Int): Boolean =
+        upload(file.readBytes(), filename, recordedAtIso, durationS)
+
     fun upload(uri: Uri, filename: String, recordedAtIso: String, durationS: Int): Boolean {
+        val bytes = context.contentResolver.openInputStream(uri)?.use { it.readBytes() } ?: return false
+        return upload(bytes, filename, recordedAtIso, durationS)
+    }
+
+    private fun upload(bytes: ByteArray, filename: String, recordedAtIso: String, durationS: Int): Boolean {
         return try {
-            val bytes = context.contentResolver.openInputStream(uri)?.use { it.readBytes() } ?: return false
             val media = "audio/*".toMediaTypeOrNull()
             val body = MultipartBody.Builder()
                 .setType(MultipartBody.FORM)

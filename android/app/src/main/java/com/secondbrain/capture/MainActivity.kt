@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.os.Build
+import android.os.Environment
 import android.os.PowerManager
 import android.provider.Settings
 import android.widget.Button
@@ -36,9 +37,6 @@ class MainActivity : AppCompatActivity() {
         Manifest.permission.POST_NOTIFICATIONS,
     )
 
-    private val audioPerm =
-        if (Build.VERSION.SDK_INT >= 33) Manifest.permission.READ_MEDIA_AUDIO
-        else Manifest.permission.READ_EXTERNAL_STORAGE
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -72,7 +70,17 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
         }
         findViewById<Button>(R.id.permAudio).setOnClickListener {
-            ActivityCompat.requestPermissions(this, arrayOf(audioPerm), 2)
+            // Записи звонков Samsung читаются только через доступ ко всем файлам.
+            try {
+                startActivity(
+                    Intent(
+                        Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION,
+                        Uri.parse("package:$packageName"),
+                    ),
+                )
+            } catch (e: Exception) {
+                startActivity(Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION))
+            }
         }
         findViewById<Button>(R.id.permBattery).setOnClickListener {
             startActivity(
@@ -110,8 +118,7 @@ class MainActivity : AppCompatActivity() {
     private fun hasNotificationAccess(): Boolean =
         NotificationManagerCompat.getEnabledListenerPackages(this).contains(packageName)
 
-    private fun hasAudioPerm(): Boolean =
-        ContextCompat.checkSelfPermission(this, audioPerm) == PackageManager.PERMISSION_GRANTED
+    private fun hasAudioPerm(): Boolean = Environment.isExternalStorageManager()
 
     private fun batteryUnrestricted(): Boolean =
         getSystemService(PowerManager::class.java).isIgnoringBatteryOptimizations(packageName)
