@@ -17,6 +17,7 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.secondbrain.capture.capture.BootReceiver
 import com.secondbrain.capture.capture.CaptureService
+import com.secondbrain.capture.capture.RecordingWatcher
 import com.secondbrain.capture.data.EventStore
 import com.secondbrain.capture.net.Uploader
 import com.secondbrain.capture.work.UploadWorker
@@ -82,7 +83,11 @@ class MainActivity : AppCompatActivity() {
             UploadWorker.uploadNow(this)
             io.execute {
                 Uploader(this).uploadPending()
-                runOnUiThread { refresh() }
+                val recs = runCatching { RecordingWatcher(this).scan() }.getOrDefault(0)
+                runOnUiThread {
+                    if (recs > 0) android.widget.Toast.makeText(this, "Записей отправлено: $recs", android.widget.Toast.LENGTH_SHORT).show()
+                    refresh()
+                }
             }
         }
     }

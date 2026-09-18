@@ -72,7 +72,12 @@ class CaptureService : Service() {
         Thread { runCatching { RecordingWatcher(this).scan() } }.start()
     }
 
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int = START_STICKY
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        // Повторный запуск (открыли приложение): пересканируем звонки и записи.
+        handler.post(scanCalls)
+        handler.post(scanRecordings)
+        return START_STICKY
+    }
 
     override fun onDestroy() {
         handler.removeCallbacksAndMessages(null)

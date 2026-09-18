@@ -12,17 +12,21 @@ import androidx.work.OutOfQuotaPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
+import com.secondbrain.capture.capture.RecordingWatcher
 import com.secondbrain.capture.net.Uploader
 import java.util.concurrent.TimeUnit
 
 /** Доставка буфера. Периодически раз в 15 минут как страховка, плюс немедленно после каждого события. */
 class UploadWorker(context: Context, params: WorkerParameters) : CoroutineWorker(context, params) {
 
-    override suspend fun doWork(): Result =
-        when (Uploader(applicationContext).uploadPending()) {
+    override suspend fun doWork(): Result {
+        // Заодно подбираем новые записи звонков, которые Android проиндексировал с задержкой.
+        runCatching { RecordingWatcher(applicationContext).scan() }
+        return when (Uploader(applicationContext).uploadPending()) {
             is Uploader.Result.Ok -> Result.success()
             is Uploader.Result.Fail -> if (runAttemptCount < 5) Result.retry() else Result.failure()
         }
+    }
 
     companion object {
         private const val PERIODIC = "upload-periodic"
