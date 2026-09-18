@@ -22,7 +22,12 @@ class RecordingUploader(private val context: Context) {
         .build()
 
     fun uploadFile(file: File, filename: String, recordedAtIso: String, durationS: Int): Boolean =
-        upload(file.readBytes(), filename, recordedAtIso, durationS)
+        try {
+            upload(file.readBytes(), filename, recordedAtIso, durationS)
+        } catch (e: Exception) {
+            Log.w("brain.recup", "read failed for ${file.absolutePath}", e)
+            false
+        }
 
     fun upload(uri: Uri, filename: String, recordedAtIso: String, durationS: Int): Boolean {
         val bytes = context.contentResolver.openInputStream(uri)?.use { it.readBytes() } ?: return false

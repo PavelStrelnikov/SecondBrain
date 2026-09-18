@@ -91,7 +91,7 @@ class MainActivity : AppCompatActivity() {
             UploadWorker.uploadNow(this)
             io.execute {
                 Uploader(this).uploadPending()
-                val recs = runCatching { RecordingWatcher(this).scan() }.getOrDefault(0)
+                val recs = runCatching { RecordingWatcher(this).scan(force = true) }.getOrDefault(0)
                 runOnUiThread {
                     if (recs > 0) android.widget.Toast.makeText(this, "Записей отправлено: $recs", android.widget.Toast.LENGTH_SHORT).show()
                     refresh()

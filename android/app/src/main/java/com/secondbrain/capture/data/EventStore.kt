@@ -68,6 +68,10 @@ class EventStore(context: Context) : SQLiteOpenHelper(context, "events.db", null
         writableDatabase.delete("uploaded_recordings", "file_key = ?", arrayOf(fileKey))
     }
 
+    fun clearRecordingsSeen() {
+        writableDatabase.delete("uploaded_recordings", null, null)
+    }
+
     fun countPending(): Long = readableDatabase.compileStatement("SELECT COUNT(*) FROM events WHERE sent = 0").simpleQueryForLong()
     fun countSent(): Long = readableDatabase.compileStatement("SELECT COUNT(*) FROM events WHERE sent = 1").simpleQueryForLong()
 }
