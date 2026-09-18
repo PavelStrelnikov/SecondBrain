@@ -67,7 +67,13 @@ async def _finish(rec_id, *, transcript=None, language=None, error=None):
 async def main() -> None:
     log.info("transcribe worker started, polling every 5s")
     while True:
-        rec = await _claim_one()
+        try:
+            rec = await _claim_one()
+        except Exception:  # noqa: BLE001
+            # База ещё мигрирует или временно недоступна: подождём и попробуем снова, не падая.
+            log.warning("db not ready yet, retrying in 5s")
+            await asyncio.sleep(5)
+            continue
         if rec is None:
             await asyncio.sleep(5)
             continue
@@ -78,7 +84,10 @@ async def main() -> None:
             log.info("done %s (%s, %d chars)", rec.filename, language, len(text))
         except Exception as e:  # noqa: BLE001
             log.exception("transcription failed for %s", rec.filename)
-            await _finish(rec.id, error=f"{type(e).__name__}: {e}")
+            try:
+                await _finish(rec.id, error=f"{type(e).__name__}: {e}")
+            except Exception:  # noqa: BLE001
+                log.exception("failed to record error status")
 
 
 if __name__ == "__main__":
